@@ -1,10 +1,108 @@
-<!DOCTYPE html>
-<html lang="ru">
-  <head>
-    <meta charset="utf-8">
-    <title>MosPolyHelper</title>
-  </head>
-  <body>
-<h1>MosPolyHelper</h1>
-  </body>
-</html>
+<!DOCTYPE html> 
+<html> 
+  
+<head> 
+    <title>MosPolyHelper</title> 
+    <style>
+        table {
+            border: 1px solid black;
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+        }
+        td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            width: 10%;
+            padding: 10px;
+        }
+        th {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 10px;
+        }
+        table p {
+            display: inline-block;
+        }
+        
+        </style>
+</head> 
+  
+<body> 
+    <input type="file" name="inputfile"
+            id="inputfile"> 
+    <br> 
+   
+    <pre id="output"></pre> 
+      
+    <script type="text/javascript"> 
+    const times = ['9:00-10:30','10:40-12:10','12:20-13:50','14:30-16:00','16:10-17:40','17:50-19:20','19:30-21:00']
+    const days = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"]
+        document.getElementById('inputfile') 
+            .addEventListener('change', function() { 
+              
+            var fr=new FileReader(); 
+            fr.onload=function(){ 
+                const schedule = JSON.parse(fr.result);
+                var table = "<table>";
+                table += "<tr>";
+                for (var i = 1; i <= 8; i++) {
+                    var iDay = (i - 1);
+                    if (iDay == 0) {
+                        table += "<th>";
+                        table += "</th>";
+                        continue
+                    } else if (iDay == 7) {
+                        iDay = 0
+                    }
+                    table += "<th>";
+                    table += days[iDay];
+                    table += "</th>";
+                    
+                }
+                table += "</tr>";
+                for (var j = 0; j < 7; j++) {
+                    table += "<tr>";
+                    for (var i = 1; i <= 7; i++) {
+                        var iDay = (i - 1);
+                        if (iDay == 0) {
+                            table += "<td>";
+                                table += "<p>" + times[j] + `</p><p>${j + 1}-е занятие</p>`;
+                            table += "</td>";
+                            continue
+                        } else if (iDay == 7) {
+                            iDay = 0
+                        }   
+                        const lessons = schedule.dailySchedules[iDay].filter(lesson => lesson.order == j);
+                        table += "<td><p>";
+                        lessons.forEach(lesson => {
+                            table += "<b>" + lesson.title + " (" + lesson.type + ")</b><br>";
+                            table += lesson.teachers.map(teacher => teacher.names.join(" ")).join() + "<br>"
+                            table += lesson.auditoriums.map(aud => aud.title).join() + "<br>"
+
+                            var options = { month: 'short', day: 'numeric' };
+                            if (lesson.dateTo == lesson.dateFrom) {
+                                table +=  new Date(lesson.dateFrom).toLocaleDateString("ru-RU", options) + "<br>"
+                            } else {
+                                table += 
+                                new Date(lesson.dateFrom).toLocaleDateString("ru-RU", options) + 
+                                " - " + 
+                                new Date(lesson.dateTo).toLocaleDateString("ru-RU", options) + "<br>"
+                            }
+                            table += "<br>";
+                        });
+                        table += "</p></td>";
+                    }
+                    table += "</tr>";
+                }
+                
+                table += "</table>";
+                document.getElementById('output').outerHTML=table;
+            } 
+              
+            fr.readAsText(this.files[0]); 
+        });
+    </script> 
+</body> 
+  
+</html> 
